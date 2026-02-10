@@ -24,7 +24,7 @@ import profileImg from '../assets/profile.png';
 
 export const resumeData = {
   personalInfo: {
-    name: "Marlen Franto B",
+    name: "Marlen Franto",
     title: "Senior Mobile Application Developer",
     profileImage: profileImg,
     email: "marlenfranto0716@gmail.com",
@@ -41,7 +41,7 @@ export const resumeData = {
       company: "Mako IT Lab",
       location: "Chennai, Tamil Nadu",
       period: "January 2024 to Present",
-      role: "Flutter Application Developer",
+      role: "Senior Software Engineer",
       // Responsibilities inferred from general description or similar roles if not explicitly separated
       description: "Working on advanced mobile applications."
     },
@@ -49,21 +49,21 @@ export const resumeData = {
       company: "OPTX",
       location: "Chennai, Tamil Nadu",
       period: "July 2023 to January 2024",
-      role: "Flutter Application Developer",
+      role: "Senior Software Engineer",
       description: "Developed OPTX mobile app providing on-the-go access to Player Profiles, Live Floor Monitor, and Reservations. Involved in Sprint planning, API integration, UI design, and critical module development."
     },
     {
       company: "CI Global Technologies",
       location: "Chennai, Tamil Nadu",
       period: "May 2021 to June 2023",
-      role: "Flutter Application Developer",
+      role: "Software Engineer",
       description: "Worked on sports management apps like SPAID and Timekeeper Console. Responsibilities included Sprint planning, API integration, UI design, and Live score streaming."
     },
     {
       company: "RSalesARm Pvt Ltd",
       location: "Chennai, Tamil Nadu",
       period: "May 2019 to May 2021",
-      role: "Flutter Application Developer",
+      role: "Mobile Application Developer",
       description: "Worked on various Android and Flutter projects including digital learning platforms and sales automation tools."
     }
   ],

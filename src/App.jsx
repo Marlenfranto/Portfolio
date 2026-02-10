@@ -25,8 +25,8 @@ function App() {
       <Suspense fallback={<div style={{ height: '100vh' }}></div>}>
         <Experience />
         <Projects />
-        <Education />
         <Skills />
+        <Education />
         <Contact />
       </Suspense>
     </div>
