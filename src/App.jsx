@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Education from './components/Education';
-import Skills from './components/Skills';
-import Contact from './components/Contact';
+// Lazy load components below the fold
+const Experience = React.lazy(() => import('./components/Experience'));
+const Projects = React.lazy(() => import('./components/Projects'));
+const Education = React.lazy(() => import('./components/Education'));
+const Skills = React.lazy(() => import('./components/Skills'));
+const Contact = React.lazy(() => import('./components/Contact'));
 
 import GalaxyBackground from './components/GalaxyBackground';
 import CustomCursor from './components/CustomCursor';
@@ -20,14 +21,14 @@ function App() {
       <Navbar />
       <Hero />
 
-      {/* Sections placeholders */}
-      <Experience />
-
-      <Projects />
-      <Education />
-      <Skills />
-
-      <Contact />
+      {/* Sections placeholders with Suspense */}
+      <Suspense fallback={<div style={{ height: '100vh' }}></div>}>
+        <Experience />
+        <Projects />
+        <Education />
+        <Skills />
+        <Contact />
+      </Suspense>
     </div>
   );
 }
