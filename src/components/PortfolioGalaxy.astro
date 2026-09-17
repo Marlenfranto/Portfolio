@@ -41,6 +41,13 @@ const worlds = [
       return;
     }
 
+    root.classList.add('is-fallback');
+    let started = false;
+    const startGalaxy = () => {
+      if (started) return;
+      started = true;
+      root.classList.remove('is-fallback');
+
     const gl = canvas.getContext('webgl2', {
       alpha: true,
       antialias: false,
@@ -601,5 +608,23 @@ const worlds = [
     renderedPosition = reduced ? targetPosition : Math.max(0, targetPosition - 0.12);
     updateReadout(Math.max(0, Math.min(count - 1, Math.round(targetPosition))));
     frame = requestAnimationFrame(render);
+    };
+
+    const requestStart = () => {
+      removeStartListeners();
+      requestAnimationFrame(startGalaxy);
+    };
+
+    const removeStartListeners = () => {
+      window.removeEventListener('scroll', requestStart);
+      window.removeEventListener('pointermove', requestStart);
+      window.removeEventListener('touchstart', requestStart);
+      window.removeEventListener('keydown', requestStart);
+    };
+
+    window.addEventListener('scroll', requestStart, { passive: true, once: true });
+    window.addEventListener('pointermove', requestStart, { passive: true, once: true });
+    window.addEventListener('touchstart', requestStart, { passive: true, once: true });
+    window.addEventListener('keydown', requestStart, { passive: true, once: true });
   })();
 </script>
