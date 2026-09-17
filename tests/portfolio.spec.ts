@@ -42,7 +42,9 @@ test('reduced motion keeps content readable and removes cinematic movement', asy
 
   await expect(page.locator('[data-reveal]').first()).toHaveCSS('opacity', '1');
   await expect(page.locator('.galaxy-observatory')).toBeVisible();
-  await expect(page.locator('[data-galaxy-canvas]')).toBeVisible();
+  await expect(page.locator('[data-portfolio-galaxy]')).toHaveClass(/is-fallback/);
+  await expect(page.locator('[data-galaxy-canvas]')).toBeHidden();
+  await expect(page.locator('.galaxy-fallback')).toBeVisible();
   await expect(page.locator('.cosmic-cursor')).toBeHidden();
   await expect(page.locator('.hero h1')).toBeVisible();
 });
