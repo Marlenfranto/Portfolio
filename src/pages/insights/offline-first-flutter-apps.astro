@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../components/BaseLayout.astro';
+import { insightArticles, siteConfig } from '../../data/site';
+
+const article = insightArticles.find((item) => item.slug === 'offline-first-flutter-apps');
+
+const structuredData = article
+  ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description: article.description,
+        datePublished: article.publishedDate,
+        dateModified: article.updatedDate,
+        author: { '@type': 'Person', name: siteConfig.name, url: siteConfig.url },
+        publisher: { '@type': 'Person', name: siteConfig.name, url: siteConfig.url },
+        mainEntityOfPage: `${siteConfig.url}/insights/${article.slug}/`,
+      },
+    ]
+  : [];
+---
+
+<BaseLayout
+  title="Designing Offline-First Flutter Apps | Marlen Franto"
+  description={article?.description}
+  path="/insights/offline-first-flutter-apps/"
+  type="article"
+  publishedDate={article?.publishedDate}
+  updatedDate={article?.updatedDate}
+  structuredData={structuredData}
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Insights', url: '/insights/' }, { name: 'Offline-first Flutter apps', url: '/insights/offline-first-flutter-apps/' }]}
+>
+  <article class="section">
+    <div class="container article-body">
+      <p class="eyebrow">Flutter architecture</p>
+      <h1>Designing Offline-First Flutter Apps: Sync, Cache, and Recovery</h1>
+      <p class="lead">Offline-first work is not only a storage decision. It is a delivery decision because sync behavior, failure states, QA coverage, and ETA communication all affect whether the app can be trusted in the field.</p>
+
+      <h2>Start with the business promise</h2>
+      <p>Before choosing a database or sync pattern, define what the app must still let the user do without a connection. A tyre catalog, construction field app, learning product, or POS workflow will each have a different offline promise.</p>
+
+      <h2>Plan the data contract early</h2>
+      <p>Offline-first apps need clear ownership of local models, server models, stale data, conflict rules, and recovery behavior. These decisions should become sprint-ready stories with acceptance criteria before implementation starts.</p>
+
+      <h2>Communicate ETAs around risk</h2>
+      <p>Offline work usually carries hidden risk in sync, migration, permissions, and edge-case testing. A useful ETA names those dependencies and explains what will change if API readiness, QA results, or stakeholder feedback shifts.</p>
+
+      <h2>Design recovery as a feature</h2>
+      <p>Recovery screens, retry states, partial sync feedback, and post-release monitoring matter as much as the happy path. Users trust offline apps when the product explains what happened and what they can do next.</p>
+
+      <h2>Review with real scenarios</h2>
+      <p>Sprint reviews should demonstrate poor network behavior, stale data, failed requests, resumed sync, and release readiness. This keeps client feedback tied to practical field conditions rather than only polished screens.</p>
+    </div>
+  </article>
+</BaseLayout>

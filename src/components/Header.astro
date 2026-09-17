@@ -1,0 +1,66 @@
+---
+import { siteConfig } from '../data/site';
+---
+
+<header class="site-header" data-site-header>
+  <nav class="container nav" aria-label="Primary navigation">
+    <a class="brand" href="/#home" data-nav-target="home">
+      <span class="brand-mark" aria-hidden="true">M</span>
+      <span class="brand-copy">
+        <strong>{siteConfig.name}</strong>
+        <small>Senior mobile systems engineer</small>
+      </span>
+    </a>
+    <div class="nav-actions">
+      <div class="nav-menu">
+        <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-links" data-menu-toggle>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+        <div class="nav-links" id="primary-links" data-nav-links>
+          <a href="/#about" data-nav-target="about">About</a>
+          <a href="/#skills" data-nav-target="skills">Skills</a>
+          <a href="/#projects" data-nav-target="projects">Projects</a>
+          <a href="/#engineering" data-nav-target="engineering">Engineering</a>
+          <a href="/#experience" data-nav-target="experience">Experience</a>
+          <a href="/#contact" data-nav-target="contact">Contact</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const navigation = document.querySelector<HTMLElement>('[data-nav-links]');
+  const menuLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav-links a'));
+
+  const setMenuState = (isOpen: boolean) => {
+    navigation?.classList.toggle('is-open', isOpen);
+    document.body.classList.toggle('nav-open', isOpen);
+    menuButton?.setAttribute('aria-expanded', String(isOpen));
+    menuButton?.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+  };
+
+  menuButton?.addEventListener('click', () => {
+    const isOpen = !navigation?.classList.contains('is-open');
+    setMenuState(isOpen);
+    if (isOpen) menuLinks[0]?.focus();
+  });
+
+  menuLinks.forEach((link) => link.addEventListener('click', () => setMenuState(false)));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !navigation?.classList.contains('is-open')) return;
+    setMenuState(false);
+    menuButton?.focus();
+  });
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!navigation?.classList.contains('is-open')) return;
+    const target = event.target as Node;
+    if (navigation.contains(target) || menuButton?.contains(target)) return;
+    setMenuState(false);
+  });
+</script>

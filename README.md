@@ -1,16 +1,61 @@
-# React + Vite
+# Marlen Franto Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Static Astro portfolio for Marlen Franto, positioned around senior Flutter and mobile engineering, production-grade systems, client-facing delivery, case studies, technical SEO, and a dark-space visual system.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node 24 LTS
+- npm
 
-## React Compiler
+Use `.nvmrc` if you have `nvm` installed:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+nvm use
+```
 
-## Expanding the ESLint configuration
+## Local Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+Astro will print a local URL, usually:
+
+```bash
+http://localhost:4321/
+```
+
+## Verification
+
+```bash
+npm run check
+npm run lint
+npm run build
+npx playwright install chromium
+npm run test:e2e
+npm run test:lighthouse
+npm audit --omit=dev
+```
+
+`npm run build` runs Astro type checking, creates the static production site, and validates required routes, metadata, structured data, local links, draft exclusion, sitemap/RSS/robots output, and asset budgets.
+
+`npm run test:e2e` runs desktop and mobile Chromium checks for the homepage, fixed galaxy design, work index, case-study delivery sections, and contact form accessibility.
+
+`npm run test:lighthouse` runs Lighthouse CI against the built static site and enforces launch thresholds for performance, accessibility, SEO, best practices, and JavaScript budget.
+
+## Main Routes
+
+- `/`
+- `/work/`
+- `/work/perfecta-smart-grill-flutter/`
+- `/work/eurogrip-offline-first-flutter/`
+- `/work/pegasus-construction-mobile-app/`
+- `/work/hidden-kingdoms-native-mobile-app/`
+- `/work/optx-real-time-casino-operations/`
+- `/about/`
+- `/resume/`
+- `/insights/`
+- `/insights/offline-first-flutter-apps/`
+- `/rss.xml`
+- `/robots.txt`

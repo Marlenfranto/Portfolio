@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../components/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { featuredCaseStudies, siteConfig, visibleProjects } from '../../data/site';
+
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Mobile app case studies and project portfolio',
+    url: `${siteConfig.url}/work/`,
+    mainEntity: visibleProjects.map((project) => ({
+      '@type': 'CreativeWork',
+      name: project.title,
+      url: project.caseStudy ? `${siteConfig.url}/work/${project.slug}/` : `${siteConfig.url}/work/#${project.slug}`,
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title="Work | Marlen Franto Mobile App Case Studies"
+  description="Explore Marlen Franto's Flutter, Android, iOS, offline-first, connected hardware, real-time dashboard, and mobile delivery project portfolio."
+  path="/work/"
+  structuredData={structuredData}
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }]}
+>
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Case studies</p>
+        <h1>Mobile products delivered with engineering and client-facing ownership.</h1>
+        <p class="lead">Five deep case studies are published first. The remaining 17 projects stay as concise summaries to avoid thin pages while still showing breadth.</p>
+      </div>
+      <h2 class="sr-only">Featured case studies</h2>
+      <div class="grid three">
+        {featuredCaseStudies.map((project, index) => <ProjectCard project={project} priority={index === 0} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">All showcased products</p>
+        <h2>22 projects across Flutter, Android, iOS, offline-first, IoT, POS, learning, and operations.</h2>
+      </div>
+      <div class="grid three">
+        {visibleProjects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

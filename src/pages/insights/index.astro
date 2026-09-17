@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../components/BaseLayout.astro';
+import { insightArticles } from '../../data/site';
+
+const published = insightArticles.filter((article) => !article.draft);
+const planned = insightArticles.filter((article) => article.draft);
+---
+
+<BaseLayout
+  title="Insights | Marlen Franto Mobile Delivery Articles"
+  description="Technical and delivery-leadership articles by Marlen Franto on Flutter architecture, offline-first mobile apps, sprint planning, ETA communication, and release risks."
+  path="/insights/"
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Insights', url: '/insights/' }]}
+>
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Insights</p>
+        <h1>Practical writing on mobile architecture and delivery leadership.</h1>
+        <p class="lead">Articles publish on the portfolio first, then become LinkedIn and GitHub material for reach and visibility.</p>
+      </div>
+      <div class="grid two">
+        {published.map((article) => (
+          <a class="project-card" href={`/insights/${article.slug}/`}>
+            <div class="project-card-body">
+              <p class="eyebrow">Published</p>
+              <h2>{article.title}</h2>
+              <p class="muted">{article.description}</p>
+              <span class="button ghost" aria-hidden="true">Read Article</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Monthly queue</p>
+        <h2>Planned publishing topics.</h2>
+      </div>
+      <div class="grid three">
+        {planned.map((article) => (
+          <article class="card">
+            <h3>{article.title}</h3>
+            <p class="muted">{article.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

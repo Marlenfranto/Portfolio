@@ -1,0 +1,504 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import Contact from '../components/Contact.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import OrbitUniverse from '../components/OrbitUniverse.astro';
+import PortfolioGalaxy from '../components/PortfolioGalaxy.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
+import {
+  deliveryCapabilities,
+  engineeringCapabilities,
+  experience,
+  featuredCaseStudies,
+  portfolioSignals,
+  profile,
+  siteConfig,
+  skills,
+} from '../data/site';
+
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteConfig.url}/#website`,
+    name: siteConfig.name,
+    url: siteConfig.url,
+    about: { '@id': `${siteConfig.url}/#person` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${siteConfig.url}/#person`,
+    name: siteConfig.name,
+    jobTitle: siteConfig.role,
+    email: `mailto:${siteConfig.email}`,
+    url: siteConfig.url,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Chennai',
+      addressCountry: 'IN',
+    },
+    sameAs: [siteConfig.social.linkedin, siteConfig.social.github],
+    knowsAbout: [
+      'Flutter',
+      'Android',
+      'iOS',
+      'Offline-first mobile architecture',
+      'GIS mobile applications',
+      'Bluetooth Low Energy',
+      'Serverpod API development',
+      'Flutter Web',
+      'Flutter desktop apps',
+      'Product analytics event tracking',
+      'Mobile project delivery',
+    ],
+  },
+];
+
+const engineeringProblems = [
+  {
+    label: 'Offline systems',
+    title: 'Scaling Offline Synchronization',
+    problem: 'Record-by-record synchronization can turn a large local data set into a noisy, fragile API workload.',
+    approach: 'Use an operation queue, deliberate batching, retry state, conflict rules, and visible recovery paths.',
+    flow: ['Local data', 'Operation queue', 'Batching', 'API', 'Recovery'],
+  },
+  {
+    label: 'Document workflows',
+    title: 'Offline PDF Annotation',
+    problem: 'Annotations must remain trustworthy while documents move between cached, edited, queued, and shared states.',
+    approach: 'Separate the document cache from annotation records and synchronize operations through an explicit queue.',
+    flow: ['PDF', 'Local cache', 'Annotations', 'Sync engine', 'Shared layer'],
+  },
+  {
+    label: 'Field operations',
+    title: 'GIS + Mobile',
+    problem: 'Map-driven field work has to remain useful when location data is active but network access is not.',
+    approach: 'Treat offline maps, feature edits, device location, and reconciliation as one coordinated workflow.',
+    flow: ['Flutter', 'GIS layer', 'ArcGIS', 'Offline map', 'Sync'],
+  },
+  {
+    label: 'Connected hardware',
+    title: 'Reliable Device Communication',
+    problem: 'Real-world Bluetooth and hardware states change outside the app and can fail mid-operation.',
+    approach: 'Model discovery, connection, telemetry, commands, errors, and reconnection as observable states.',
+    flow: ['Mobile app', 'BLE', 'Device', 'Device data', 'UI state'],
+  },
+];
+
+const architectureLabs = [
+  {
+    title: 'Offline-First Architecture',
+    description: 'A resilient data path that keeps the interface useful before, during, and after synchronization.',
+    nodes: ['UI', 'State', 'Repository', 'SQLite', 'Sync Queue', 'REST API'],
+    accent: 'blue' as const,
+  },
+  {
+    title: 'Mobile + GIS',
+    description: 'A field-ready map stack that connects Flutter experiences with GIS services and offline storage.',
+    nodes: ['Flutter', 'Map Layer', 'GIS Services', 'Offline Storage', 'Sync'],
+    accent: 'cyan' as const,
+  },
+  {
+    title: 'Flutter + Serverpod APIs',
+    description: 'A full-stack product path connecting Flutter clients, typed APIs, persistence, analytics, and release surfaces.',
+    nodes: ['Flutter', 'Serverpod', 'PostgreSQL', 'Events', 'Web + Apps'],
+    accent: 'violet' as const,
+  },
+];
+
+const planetChapters = {
+  signals: {
+    body: 'Mercury',
+    label: 'Signal Console',
+    orbit: 'First-read proof',
+    color: '#58d6ff',
+    index: 1,
+  },
+  about: {
+    body: 'Venus',
+    label: 'Engineer Core',
+    orbit: 'Narrative gravity',
+    color: '#ffb86b',
+    index: 2,
+  },
+  build: {
+    body: 'Earth',
+    label: 'Build Domains',
+    orbit: 'Product surfaces',
+    color: '#5eead4',
+    index: 3,
+  },
+  skills: {
+    body: 'Mars',
+    label: 'Tech Constellation',
+    orbit: 'Connected stack',
+    color: '#ff7ab6',
+    index: 4,
+  },
+  projects: {
+    body: 'Jupiter',
+    label: 'Featured Missions',
+    orbit: 'Case-study planets',
+    color: '#a78bfa',
+    index: 5,
+  },
+  engineering: {
+    body: 'Saturn',
+    label: 'Problem Systems',
+    orbit: 'Technical gravity',
+    color: '#facc15',
+    index: 6,
+  },
+  architecture: {
+    body: 'Uranus',
+    label: 'Architecture Lab',
+    orbit: 'Data paths',
+    color: '#67e8f9',
+    index: 7,
+  },
+  delivery: {
+    body: 'Neptune',
+    label: 'Delivery Orbit',
+    orbit: 'Stakeholder confidence',
+    color: '#60a5fa',
+    index: 8,
+  },
+  experience: {
+    body: 'Pluto',
+    label: 'Career Timeline',
+    orbit: 'Journey record',
+    color: '#c4b5fd',
+    index: 9,
+  },
+  resume: {
+    body: 'Comet',
+    label: 'Career Snapshot',
+    orbit: 'Resume path',
+    color: '#f0abfc',
+    index: 10,
+  },
+  contact: {
+    body: 'Launch',
+    label: 'Contact Window',
+    orbit: 'Next mission',
+    color: '#38bdf8',
+    index: 11,
+  },
+};
+---
+
+<BaseLayout title={profile.title} description={profile.summary} structuredData={structuredData} bodyClass="home-page">
+  <section class="hero" id="home" aria-labelledby="hero-title" data-hero>
+    <div class="hero-atmosphere" aria-hidden="true">
+      <span class="hero-nebula"></span>
+      <span class="hero-horizon"></span>
+      <span class="hero-flight-line"></span>
+    </div>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="hero-kicker"><span aria-hidden="true">Transmission 07</span> Chennai · India</p>
+        <p class="hero-name">Marlen Franto</p>
+        <p class="eyebrow">Senior Mobile App Developer · Flutter Engineer</p>
+        <h1 id="hero-title">{profile.headline}</h1>
+        <p class="lead">Building immersive, scalable, and high-performance digital experiences with Flutter, mobile technologies, cloud platforms, and modern software architecture.</p>
+        <p class="availability"><span aria-hidden="true"></span>{profile.locationLine}</p>
+        <div class="hero-actions" aria-label="Primary actions">
+          <a class="button primary" href="#projects" data-magnetic>Explore My Work <span aria-hidden="true">↗</span></a>
+          <a class="button secondary" href="#contact" data-magnetic>Let’s Connect</a>
+          <a class="button ghost" href={profile.resumePath} data-magnetic>Download Resume</a>
+        </div>
+        <div class="proof-strip" aria-label="Professional highlights">
+          <div><strong>7+</strong><span>Years of mobile development</span></div>
+          <div><strong>22</strong><span>Showcased products</span></div>
+          <div><strong>6 platforms</strong><span>Mobile, web & desktop delivery</span></div>
+          <div><strong>Serverpod</strong><span>API development</span></div>
+        </div>
+      </div>
+      <OrbitUniverse />
+    </div>
+    <a class="scroll-cue" href="#about"><span aria-hidden="true"></span>Enter the engineering universe</a>
+  </section>
+
+  <section
+    class="signal-section immersive-section immersive-signal"
+    id="signals"
+    aria-labelledby="signals-title"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.signals.color}; --planet-index: ${planetChapters.signals.index};`}
+  >
+    <div class="container">
+      <div class="signal-console" data-reveal>
+        <div class="signal-console-intro">
+          <p class="eyebrow">Portfolio Signal Console</p>
+          <h2 id="signals-title">Signals that matter in the first 30 seconds.</h2>
+          <p>Engineering breadth is useful only when it leads to dependable products. These are the clearest signals of Marlen’s platform, systems, and delivery ownership.</p>
+        </div>
+        <div class="signal-grid">
+          {portfolioSignals.map((signal) => (
+            <article class="signal-card">
+              <p>{signal.label}</p>
+              <h3>{signal.title}</h3>
+              <span>{signal.detail}</span>
+              <small>{signal.evidence}</small>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section mission-section immersive-section"
+    id="about"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.about.color}; --planet-index: ${planetChapters.about.index};`}
+  >
+    <div class="container mission-grid">
+      <SectionHeading
+        eyebrow="The Engineer Behind the Interface"
+        title="Complex mobile systems, made dependable in the real world."
+        copy="The work goes beyond assembling screens. Marlen designs the data flow, native integrations, failure states, delivery plan, and release path that turn a mobile interface into a reliable product."
+      />
+      <div class="mission-copy" data-reveal>
+        <p>Specialized experience spans full-stack Flutter delivery across Android, iOS, Web, macOS, Windows, and Linux, plus native Android and iOS work, Serverpod API development, offline-first architecture, product analytics, GIS and location systems, BLE-connected hardware, camera and video processing, document workflows, payments, and cloud services.</p>
+        <p>That engineering depth is paired with client-facing delivery: clarifying requirements, shaping milestones, estimating work, communicating ETAs and risks, coordinating teams, demonstrating progress, and closing follow-up actions.</p>
+        <a class="text-link" href="/about/">Read the full engineering profile <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section build-section immersive-section"
+    id="build"
+    aria-labelledby="build-title"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.build.color}; --planet-index: ${planetChapters.build.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="What I Build"
+        title="Mobile products engineered for difficult operating conditions."
+        copy="Eight recurring product domains connect the portfolio—from full-stack Flutter delivery and analytics to field data, hardware, enterprise workflows, and media-heavy experiences."
+      />
+      <div class="capability-grid">
+        {engineeringCapabilities.map((capability, index) => (
+          <article class="capability-card" data-reveal>
+            <span class="capability-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{capability.title}</h3>
+            <p>{capability.summary}</p>
+            <small>{capability.signal}</small>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section constellation-section immersive-section"
+    id="skills"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.skills.color}; --planet-index: ${planetChapters.skills.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Technology Constellation"
+        title="A connected stack, not an icon collection."
+        copy="Technologies are grouped around the responsibility they carry in a production mobile system."
+      />
+      <div class="constellation-map" data-reveal>
+        <svg class="constellation-lines" viewBox="0 0 1000 720" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170 120 L500 360 L500 110 M500 360 L830 120 M500 360 L160 360 M500 360 L840 360 M500 360 L170 610 M500 360 L500 610 M500 360 L830 610" />
+          <path class="constellation-pulse" d="M170 120 L500 360 L840 360 L500 610 L170 610" />
+        </svg>
+        <div class="constellation-core" aria-hidden="true"><span>Mobile<br />Systems</span></div>
+        {Object.entries(skills).map(([group, items], index) => (
+          <article class:list={['constellation-group', `constellation-${index + 1}`]}>
+            <header><span aria-hidden="true"></span><h3>{group}</h3></header>
+            <div class="constellation-skills">
+              {items.map((skill) => <span>{skill}</span>)}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section projects-section immersive-section"
+    id="projects"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.projects.color}; --planet-index: ${planetChapters.projects.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Featured Missions"
+        title="Production products with engineering context."
+        copy="Each case study explains the problem, constraints, personal contribution, delivery responsibilities, technology, and approved outcome."
+      />
+      <div class="project-universe" data-reveal>
+        <div class="project-system-core" aria-hidden="true">
+          <span>22</span>
+          <small>product missions</small>
+        </div>
+        <span class="project-orbit project-orbit-one" aria-hidden="true"></span>
+        <span class="project-orbit project-orbit-two" aria-hidden="true"></span>
+      </div>
+      <div class="featured-projects project-planet-grid">
+        {featuredCaseStudies.slice(0, 3).map((project, index) => <ProjectCard project={project} priority={index === 0} />)}
+      </div>
+      <div class="section-action">
+        <a class="button secondary all-projects-cta" href="/work/">Explore All 22 Projects <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section problem-section immersive-section"
+    id="engineering"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.engineering.color}; --planet-index: ${planetChapters.engineering.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Engineering Problems I’ve Solved"
+        title="The systems behind the interface."
+        copy="Selected technical patterns show how complex mobile work is reasoned about—not just which frameworks appear in the final build."
+      />
+      <div class="problem-grid">
+        {engineeringProblems.map((problem) => (
+          <article class="problem-card" data-reveal data-tilt>
+            <p class="problem-label">{problem.label}</p>
+            <h3>{problem.title}</h3>
+            <dl>
+              <div><dt>The problem</dt><dd>{problem.problem}</dd></div>
+              <div><dt>Engineering response</dt><dd>{problem.approach}</dd></div>
+            </dl>
+            <div class="mini-flow" aria-label={`${problem.title} system flow`}>
+              {problem.flow.map((item, index) => (
+                <><span>{item}</span>{index < problem.flow.length - 1 && <i aria-hidden="true">→</i>}</>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section architecture-section immersive-section"
+    id="architecture"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.architecture.color}; --planet-index: ${planetChapters.architecture.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Architecture Lab"
+        title="Simple diagrams for systems that are not simple."
+        copy="These views intentionally remove implementation noise so the important boundaries, data paths, and failure points stay visible."
+      />
+      <div class="architecture-grid">
+        {architectureLabs.map((diagram) => <ArchitectureDiagram {...diagram} />)}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section delivery-section immersive-section"
+    id="delivery"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.delivery.color}; --planet-index: ${planetChapters.delivery.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Technical Delivery & Client Collaboration"
+        title="Engineering leadership includes the delivery system."
+        copy="Discovery, planning, estimates, ETAs, risk communication, demos, action tracking, and release coordination stay connected to the technical work."
+      />
+      <div class="delivery-grid">
+        {deliveryCapabilities.map((capability) => (
+          <article class="delivery-card" data-reveal data-tilt>
+            <span aria-hidden="true"></span>
+            <h3>{capability.title}</h3>
+            <p>{capability.detail}</p>
+            <small>{capability.proof}</small>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section experience-section immersive-section"
+    id="experience"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.experience.color}; --planet-index: ${planetChapters.experience.index};`}
+  >
+    <div class="container">
+      <SectionHeading
+        eyebrow="Engineering Timeline"
+        title="A career shaped through increasingly complex missions."
+        copy="Roles are shown with factual scope, core technology ownership, delivery responsibility, and the products supported."
+      />
+      <div class="mission-timeline">
+        {experience.map((item, index) => (
+          <article class="mission-item" data-reveal>
+            <div class="mission-marker" aria-hidden="true"><span>{String(index + 1).padStart(2, '0')}</span></div>
+            <div class="mission-period">{item.period}</div>
+            <div class="mission-details">
+              <p>{item.company} · {item.location}</p>
+              <h3>{item.role}</h3>
+              <ul class="clean-list">
+                <li>{item.bullets.technical[0]}</li>
+                <li>{item.bullets.delivery[0]}</li>
+                <li>{item.bullets.outcome[0]}</li>
+              </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section resume-section immersive-section"
+    id="resume"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.resume.color}; --planet-index: ${planetChapters.resume.index};`}
+  >
+    <div class="container career-snapshot" data-reveal>
+      <div>
+        <p class="eyebrow">Career Snapshot</p>
+        <h2>7+ years across mobile engineering, architecture, integrations, and delivery.</h2>
+        <p class="lead">Review the complete experience history, technology stack, education, and leadership responsibilities in HTML or PDF format.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="button primary" href="/resume/">View Resume</a>
+        <a class="button secondary" href={profile.resumePath}>Download PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="section contact-section immersive-section"
+    id="contact"
+    data-immersive-section
+    style={`--planet-color: ${planetChapters.contact.color}; --planet-index: ${planetChapters.contact.index};`}
+  >
+    <div class="container contact-band">
+      <div class="section-heading">
+        <p class="eyebrow">Let’s Connect</p>
+        <h2>Have a mobile engineering challenge?</h2>
+        <p class="lead">Let’s build something reliable, scalable, and useful.</p>
+        <div class="contact-links">
+          <a href={`mailto:${siteConfig.email}`}><span>Email</span>{siteConfig.email}</a>
+          <a href={siteConfig.social.linkedin} rel="me noopener"><span>LinkedIn</span>Connect with Marlen</a>
+          <a href={siteConfig.url}><span>Portfolio</span>marlenfranto.com</a>
+        </div>
+      </div>
+      <Contact />
+    </div>
+  </section>
+  <PortfolioGalaxy />
+</BaseLayout>

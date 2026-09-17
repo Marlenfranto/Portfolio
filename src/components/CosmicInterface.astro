@@ -1,0 +1,28 @@
+---
+const journey = [
+  { id: 'home', label: 'Launch' },
+  { id: 'about', label: 'Profile' },
+  { id: 'skills', label: 'Systems' },
+  { id: 'projects', label: 'Missions' },
+  { id: 'engineering', label: 'Lab' },
+  { id: 'experience', label: 'Journey' },
+  { id: 'contact', label: 'Signal' },
+];
+---
+
+<nav class="journey-rail" aria-label="Portfolio journey">
+  <span class="journey-rail-track" aria-hidden="true"><i></i></span>
+  {journey.map((item, index) => (
+    <a href={`/#${item.id}`} data-journey-link={item.id} aria-label={`${item.label} section`}>
+      <span class="journey-node" aria-hidden="true"></span>
+      <span class="journey-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+      <span class="journey-label">{item.label}</span>
+    </a>
+  ))}
+</nav>
+
+<div class="cosmic-progress" aria-hidden="true">
+  <span>Flight path</span>
+  <div><i></i></div>
+  <strong data-scroll-percent>00%</strong>
+</div>

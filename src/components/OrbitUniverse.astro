@@ -1,0 +1,52 @@
+---
+import { Picture } from 'astro:assets';
+import { profile } from '../data/site';
+
+const nodes = [
+  { name: 'Flutter', detail: 'Cross-platform product engineering', orbit: 'inner', position: 'one' },
+  { name: 'Android', detail: 'Kotlin and native SDK integration', orbit: 'outer', position: 'two' },
+  { name: 'iOS', detail: 'Native delivery and App Store releases', orbit: 'inner', position: 'three' },
+  { name: 'Offline', detail: 'Local-first data and synchronization', orbit: 'outer', position: 'four' },
+  { name: 'GIS', detail: 'Maps, layers, location, and field workflows', orbit: 'inner', position: 'five' },
+  { name: 'BLE', detail: 'Connected hardware and device communication', orbit: 'outer', position: 'six' },
+  { name: 'Full-stack', detail: 'Serverpod APIs, cloud integrations, and analytics events', orbit: 'outer', position: 'seven' },
+];
+---
+
+<figure class="engineering-universe" aria-labelledby="universe-caption" data-orbit-universe>
+  <div class="universe-grid" aria-hidden="true"></div>
+  <div class="universe-axis" aria-hidden="true"><span></span><span></span></div>
+  <div class="universe-scan" aria-hidden="true"></div>
+  <div class="orbit-ring orbit-ring-inner" aria-hidden="true"></div>
+  <div class="orbit-ring orbit-ring-outer" aria-hidden="true"></div>
+
+  <div class="universe-core">
+    <div class="portrait-halo" aria-hidden="true"></div>
+    <Picture
+      src={profile.image}
+      alt="Portrait of Marlen Franto"
+      widths={[320, 480, 640]}
+      sizes="(max-width: 920px) 78vw, 38vw"
+      formats={['avif', 'webp']}
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+    />
+    <figcaption id="universe-caption">
+      <strong>Marlen Franto</strong>
+      <span>Senior mobile systems engineer</span>
+    </figcaption>
+  </div>
+
+  {nodes.map((node) => (
+    <span
+      class:list={['tech-node', `tech-node-${node.position}`, `tech-node-${node.orbit}`]}
+      role="img"
+      aria-label={`${node.name}: ${node.detail}`}
+    >
+      <i aria-hidden="true"></i>
+      <strong>{node.name}</strong>
+      <small>{node.detail}</small>
+    </span>
+  ))}
+</figure>

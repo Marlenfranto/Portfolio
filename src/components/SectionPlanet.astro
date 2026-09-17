@@ -1,0 +1,26 @@
+---
+export type PlanetChapter = {
+  body: string;
+  label: string;
+  orbit: string;
+};
+
+const { chapter } = Astro.props as { chapter: PlanetChapter };
+---
+
+<div class="section-planet-map" aria-hidden="true">
+  <span class="planet-atmosphere"></span>
+  <span class="orbit-ring orbit-ring-one"></span>
+  <span class="orbit-ring orbit-ring-two"></span>
+  <span class="orbit-ring orbit-ring-three"></span>
+  <span class="planet-body"><span>{chapter.body}</span></span>
+  <span class="planet-moon"></span>
+  <span class="planet-caption">
+    <em>Orbital chapter</em>
+    <b>{chapter.label}</b>
+    <small>{chapter.orbit}</small>
+  </span>
+  <span class="planet-coordinate">SYS / {chapter.body}</span>
+  <span class="space-dust dust-one"></span>
+  <span class="space-dust dust-two"></span>
+</div>

@@ -1,0 +1,47 @@
+---
+import { Picture } from 'astro:assets';
+import type { Project } from '../data/site';
+
+const { project, priority = false } = Astro.props as { project: Project; priority?: boolean };
+const href = project.caseStudy ? `/work/${project.slug}/` : `/work/#${project.slug}`;
+---
+
+<a class:list={['project-card', project.caseStudy ? 'project-card-featured' : 'project-card-compact']} href={href} id={project.caseStudy ? undefined : project.slug} data-reveal data-tilt>
+  <div class="project-visual">
+    <span class="project-planet" aria-hidden="true"><i></i></span>
+    <span class="project-scanline" aria-hidden="true"></span>
+    <span class="project-index" aria-hidden="true">MISSION {String(project.order).padStart(2, '0')}</span>
+    <Picture
+      src={project.heroImage}
+      alt={project.heroAlt}
+      widths={[320, 520, 680]}
+      sizes="(max-width: 920px) 100vw, 33vw"
+      formats={['avif', 'webp']}
+      quality={45}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      decoding="async"
+    />
+  </div>
+  <div class="project-card-body">
+    <p class="eyebrow">{project.platforms.join(' + ')}</p>
+    <h3>{project.shortTitle}</h3>
+    <p class="muted">{project.summary}</p>
+    {project.caseStudy && (
+      <dl class="project-evidence">
+        <div>
+          <dt>Engineering challenge</dt>
+          <dd>{project.challenge}</dd>
+        </div>
+        <div>
+          <dt>Key contribution</dt>
+          <dd>{project.responsibilities[0]}</dd>
+        </div>
+      </dl>
+    )}
+    <div class="tags" aria-label={`${project.shortTitle} technologies`}>
+      {project.technologies.slice(0, 4).map((tech) => <span class="tag">{tech}</span>)}
+    </div>
+    <span class="project-link" aria-hidden="true">{project.caseStudy ? 'Explore Case Study' : 'View Project Summary'} <span>↗</span></span>
+  </div>
+</a>

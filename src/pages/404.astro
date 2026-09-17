@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+---
+
+<BaseLayout title="Page not found | Marlen Franto" description="The requested page could not be found." path="/404/" noindex={true}>
+  <section class="section">
+    <div class="container section-heading">
+      <p class="eyebrow">404</p>
+      <h1>Page not found.</h1>
+      <p class="lead">This route does not exist. The main portfolio routes are static, indexable, and linked from the navigation.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="/">Go home</a>
+        <a class="button secondary" href="/work/">View work</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

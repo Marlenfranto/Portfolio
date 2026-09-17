@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import { deliveryCapabilities, education, experience, profile, siteConfig, skills } from '../data/site';
+
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@type': 'Person',
+      '@id': `${siteConfig.url}/#person`,
+      name: siteConfig.name,
+      jobTitle: siteConfig.role,
+      url: siteConfig.url,
+      email: `mailto:${siteConfig.email}`,
+      sameAs: [siteConfig.social.linkedin, siteConfig.social.github],
+    },
+  },
+];
+---
+
+<BaseLayout
+  title="About | Marlen Franto Senior Flutter & Full-Stack Mobile Engineer"
+  description="About Marlen Franto, a Senior Flutter and full-stack mobile engineer across Android, iOS, Web, desktop, Serverpod APIs, analytics, GIS, BLE, and cloud."
+  path="/about/"
+  type="profile"
+  structuredData={structuredData}
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]}
+>
+  <section class="section">
+    <div class="container split">
+      <div class="section-heading">
+        <p class="eyebrow">The Engineer Behind the Interface</p>
+        <h1>{siteConfig.name}</h1>
+        <p class="lead">{profile.summary}</p>
+        <p class="muted">{profile.locationLine}</p>
+        <div class="hero-actions">
+          <a class="button primary" href="/work/">View Case Studies</a>
+          <a class="button secondary" href="/resume/">View Resume</a>
+        </div>
+      </div>
+      <article class="card">
+        <h2>Engineering beyond the screen.</h2>
+        <p style="margin-top: 1rem;">Marlen builds complex products across full-stack Flutter delivery, Android, iOS, Web, macOS, Windows, Linux, Serverpod API development, native integrations, offline-first data, GIS, BLE-connected hardware, camera and media workflows, documents, payments, product analytics, and cloud services.</p>
+        <p style="margin-top: 1rem;">That technical ownership is paired with practical delivery habits: discovery, requirement clarification, project planning, sprint estimation, ETA reporting, risk management, demos, feedback capture, analytics-event alignment, follow-ups, and release coordination.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Client-facing delivery</p>
+        <h2>Capabilities shown through delivery examples.</h2>
+      </div>
+      <div class="grid two">
+        {deliveryCapabilities.map((capability) => (
+          <article class="card capability">
+            <h3>{capability.title}</h3>
+            <p>{capability.detail}</p>
+            <p class="muted">{capability.proof}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Experience</p>
+        <h2>Mobile roles with expanding ownership.</h2>
+      </div>
+      <div class="timeline">
+        {experience.map((item) => (
+          <article class="card experience-item">
+            <div>
+              <h3>{item.role}</h3>
+              <p class="experience-meta">{item.company}</p>
+              <p class="experience-meta">{item.period}</p>
+            </div>
+            <div>
+              <ul class="clean-list">
+                {[...item.bullets.technical, ...item.bullets.delivery, ...item.bullets.communication, ...item.bullets.coordination, ...item.bullets.outcome].map((bullet) => <li>{bullet}</li>)}
+              </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container grid two">
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Skills</p>
+          <h2>Technical and leadership strengths.</h2>
+        </div>
+        <div class="grid">
+          {Object.entries(skills).map(([group, items]) => (
+            <article class="card">
+              <h3>{group}</h3>
+              <div class="tags" style="margin-top: 1rem;">{items.map((skill) => <span class="tag">{skill}</span>)}</div>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Education</p>
+          <h2>Academic background.</h2>
+        </div>
+        <div class="grid">
+          {education.map((item) => (
+            <article class="card">
+              <h3>{item.degree}</h3>
+              <p>{item.institution}</p>
+              <p class="muted">{item.period} - {item.details}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -8,9 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.astro
 dist
 dist-ssr
 *.local
+test-results
+playwright-report
+.lighthouseci
+.playwright-cli
+output
+src/assets/projects/generated
+src/assets/profile-new.JPG
 
 # Editor directories and files
 .vscode/*

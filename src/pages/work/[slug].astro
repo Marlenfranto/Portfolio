@@ -1,0 +1,124 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../components/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import type { Project } from '../../data/site';
+import { featuredCaseStudies, siteConfig, visibleProjects } from '../../data/site';
+
+export function getStaticPaths() {
+  return visibleProjects
+    .filter((project) => project.caseStudy)
+    .map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+const related = featuredCaseStudies.find((item) => item.slug !== project.slug) ?? featuredCaseStudies[0];
+const articleStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: project.seoTitle,
+  description: project.seoDescription,
+  datePublished: project.publishedDate,
+  dateModified: project.updatedDate,
+  author: { '@type': 'Person', name: siteConfig.name, url: siteConfig.url },
+  publisher: { '@type': 'Person', name: siteConfig.name, url: siteConfig.url },
+  mainEntityOfPage: `${siteConfig.url}/work/${project.slug}/`,
+};
+
+const deliverySections: Array<[string, string[]]> = project.delivery
+  ? [
+      ['Client context', [project.delivery.clientContext]],
+      ['Discovery and requirements', project.delivery.discovery],
+      ['Project plan and milestones', project.delivery.projectPlan],
+      ['Sprint planning approach', project.delivery.sprintResponsibilities],
+      ['Estimation and ETA communication', project.delivery.estimationApproach],
+      ['Stakeholder cadence', project.delivery.communicationCadence],
+      ['Risks, blockers, and dependencies', project.delivery.risksAndDependencies],
+      ['Client feedback and follow-ups', project.delivery.followUps],
+      ['Release responsibilities', project.delivery.releaseResponsibilities],
+    ]
+  : [];
+---
+
+<BaseLayout
+  title={project.seoTitle}
+  description={project.seoDescription}
+  path={`/work/${project.slug}/`}
+  type="article"
+  publishedDate={project.publishedDate}
+  updatedDate={project.updatedDate}
+  structuredData={[articleStructuredData]}
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }, { name: project.shortTitle, url: `/work/${project.slug}/` }]}
+>
+  <section class="section">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href="/">Home</a><span>/</span><a href="/work/">Work</a><span>/</span><span>{project.shortTitle}</span>
+      </nav>
+      <div class="split">
+        <div class="section-heading">
+          <p class="eyebrow">{project.role} · {project.period}</p>
+          <h1>{project.title}</h1>
+          <p class="lead">{project.summary}</p>
+          <div class="tags">
+            {project.technologies.map((tech) => <span class="tag">{tech}</span>)}
+          </div>
+          <div class="hero-actions">
+            {project.links.map((link) => <a class="button secondary" href={link.url} rel={link.url.startsWith('http') ? 'noopener' : undefined}>{link.label}</a>)}
+            <a class="button ghost" href="/#contact">Discuss Similar Work</a>
+          </div>
+        </div>
+        <div class="portrait-panel">
+          <Picture
+            src={project.heroImage}
+            alt={project.heroAlt}
+            widths={[360, 560, 760]}
+            sizes="(max-width: 920px) 100vw, 48vw"
+            formats={['avif', 'webp']}
+            quality={45}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container article-body">
+      <h2>Business or user problem</h2>
+      <p>{project.challenge}</p>
+
+      <h2>Technical constraints and architecture</h2>
+      <ul class="clean-list">{project.constraints.map((item) => <li>{item}</li>)}</ul>
+      <ul class="clean-list">{project.approach.map((item) => <li>{item}</li>)}</ul>
+
+      <h2>Role and ownership</h2>
+      <ul class="clean-list">{project.responsibilities.map((item) => <li>{item}</li>)}</ul>
+
+      <h2>Delivery and client communication</h2>
+      <div class="grid two">
+        {deliverySections.map(([title, items]) => (
+          <article class="card">
+            <h3>{title}</h3>
+            <ul class="clean-list">{items.map((item) => <li>{item}</li>)}</ul>
+          </article>
+        ))}
+      </div>
+
+      <h2>Approved outcomes</h2>
+      <ul class="clean-list">{project.outcomes.map((item) => <li>{item}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Related case study</p>
+        <h2>More mobile delivery work</h2>
+      </div>
+      {related && <ProjectCard project={related} />}
+    </div>
+  </section>
+</BaseLayout>

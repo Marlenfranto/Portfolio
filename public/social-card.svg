@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Marlen Franto, Senior Flutter and Mobile Engineer">
+  <defs>
+    <radialGradient id="nebula" cx="70%" cy="42%" r="58%">
+      <stop offset="0" stop-color="#5e46c9" stop-opacity=".42"/>
+      <stop offset=".46" stop-color="#1d4fa8" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#050816" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="title" x1="0" x2="1">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".68" stop-color="#b9d4ff"/>
+      <stop offset="1" stop-color="#9b7cff"/>
+    </linearGradient>
+    <pattern id="stars" width="82" height="82" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="18" r="1" fill="#9fc8ff" opacity=".48"/>
+      <circle cx="65" cy="51" r=".7" fill="#ffffff" opacity=".35"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#050816"/>
+  <rect width="1200" height="630" fill="url(#nebula)"/>
+  <rect width="1200" height="630" fill="url(#stars)"/>
+  <ellipse cx="960" cy="320" rx="210" ry="150" fill="none" stroke="#6f9bff" stroke-opacity=".25" stroke-width="2" transform="rotate(-16 960 320)"/>
+  <ellipse cx="960" cy="320" rx="145" ry="205" fill="none" stroke="#9b7cff" stroke-opacity=".2" stroke-width="2" transform="rotate(28 960 320)"/>
+  <circle cx="960" cy="320" r="82" fill="#152456" fill-opacity=".74" stroke="#83aaff" stroke-opacity=".35"/>
+  <text x="960" y="308" fill="#ffffff" font-family="Arial, sans-serif" font-size="44" font-weight="800" text-anchor="middle">MF</text>
+  <text x="960" y="350" fill="#9fc8ff" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" letter-spacing="2">MOBILE SYSTEMS</text>
+  <text x="82" y="112" fill="#53dcff" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="4">SENIOR FLUTTER &amp; MOBILE ENGINEER</text>
+  <text x="82" y="236" fill="url(#title)" font-family="Arial, sans-serif" font-size="76" font-weight="800">Marlen Franto</text>
+  <text x="82" y="327" fill="#f1f5ff" font-family="Arial, sans-serif" font-size="43" font-weight="700">Building complex mobile products</text>
+  <text x="82" y="382" fill="#f1f5ff" font-family="Arial, sans-serif" font-size="43" font-weight="700">for the real world.</text>
+  <text x="82" y="456" fill="#96a4c4" font-family="Arial, sans-serif" font-size="24">Flutter · Android · iOS · Offline-first · GIS · BLE · Cloud</text>
+  <rect x="82" y="515" width="273" height="58" rx="29" fill="#467cf4"/>
+  <text x="114" y="552" fill="#ffffff" font-family="Arial, sans-serif" font-size="22" font-weight="700">marlenfranto.com</text>
+</svg>

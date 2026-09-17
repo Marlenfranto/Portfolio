@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import { education, experience, profile, siteConfig, skills } from '../data/site';
+---
+
+<BaseLayout
+  title="Resume | Marlen Franto Senior Flutter & Full-Stack Mobile Engineer"
+  description="Resume for Marlen Franto, a Senior Flutter and full-stack mobile engineer with 7+ years across Android, iOS, Web, desktop, Serverpod APIs, analytics, GIS, BLE, and delivery."
+  path="/resume/"
+  breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Resume', url: '/resume/' }]}
+>
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Resume</p>
+        <h1>{siteConfig.name}</h1>
+        <p class="lead">{profile.summary}</p>
+        <p class="muted">{siteConfig.location} · <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a> · <a href={siteConfig.social.linkedin} rel="me noopener">LinkedIn</a> · <a href={siteConfig.social.github} rel="me noopener">GitHub</a></p>
+        <div class="hero-actions">
+          <a class="button primary" href={profile.resumePath}>Download PDF</a>
+          <a class="button secondary" href="/work/">View Case Studies</a>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Experience</h2>
+          <div class="timeline" style="margin-top: 1rem;">
+            {experience.map((item) => (
+              <article class="experience-item">
+                <div>
+                  <h3>{item.role}</h3>
+                  <p class="experience-meta">{item.company}</p>
+                  <p class="experience-meta">{item.period}</p>
+                  <p class="experience-meta">{item.location}</p>
+                </div>
+                <div class="bullet-groups">
+                  <div class="bullet-group">
+                    <h4>Technical ownership</h4>
+                    <ul class="clean-list">{item.bullets.technical.map((bullet) => <li>{bullet}</li>)}</ul>
+                  </div>
+                  <div class="bullet-group">
+                    <h4>Delivery ownership</h4>
+                    <ul class="clean-list">{item.bullets.delivery.map((bullet) => <li>{bullet}</li>)}</ul>
+                  </div>
+                  <div class="bullet-group">
+                    <h4>Client and stakeholder communication</h4>
+                    <ul class="clean-list">{item.bullets.communication.map((bullet) => <li>{bullet}</li>)}</ul>
+                  </div>
+                  <div class="bullet-group">
+                    <h4>Team coordination</h4>
+                    <ul class="clean-list">{item.bullets.coordination.map((bullet) => <li>{bullet}</li>)}</ul>
+                  </div>
+                  <div class="bullet-group">
+                    <h4>Product or operational outcome</h4>
+                    <ul class="clean-list">{item.bullets.outcome.map((bullet) => <li>{bullet}</li>)}</ul>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Skills</h2>
+          <div class="grid three" style="margin-top: 1rem;">
+            {Object.entries(skills).map(([group, items]) => (
+              <article>
+                <h3>{group}</h3>
+                <div class="tags" style="margin-top: 0.8rem;">{items.map((skill) => <span class="tag">{skill}</span>)}</div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Education</h2>
+          <div class="grid three" style="margin-top: 1rem;">
+            {education.map((item) => (
+              <article>
+                <h3>{item.degree}</h3>
+                <p>{item.institution}</p>
+                <p class="muted">{item.period} - {item.details}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

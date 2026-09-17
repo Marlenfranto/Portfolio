@@ -1,0 +1,16 @@
+{
+  "name": "Marlen Franto Portfolio",
+  "short_name": "Marlen Franto",
+  "description": "Senior Flutter and Mobile Engineer portfolio covering production-grade Android and iOS systems.",
+  "start_url": "/",
+  "display": "minimal-ui",
+  "background_color": "#050816",
+  "theme_color": "#050816",
+  "icons": [
+    {
+      "src": "/m-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

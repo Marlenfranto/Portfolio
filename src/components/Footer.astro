@@ -1,0 +1,16 @@
+---
+import { siteConfig } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>&copy; {year} {siteConfig.name}. {siteConfig.role} in {siteConfig.location}.</p>
+    <div class="footer-links" aria-label="Footer links">
+      <a href={siteConfig.social.linkedin} rel="me noopener">LinkedIn</a>
+      <a href={siteConfig.social.github} rel="me noopener">GitHub</a>
+      <a href={`mailto:${siteConfig.email}`}>Email</a>
+      <a href="/rss.xml">RSS</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,26 @@
+---
+const { title, description, nodes, accent = 'blue' } = Astro.props as {
+  title: string;
+  description: string;
+  nodes: string[];
+  accent?: 'blue' | 'violet' | 'cyan';
+};
+---
+
+<article class:list={['architecture-card', `architecture-${accent}`]} data-reveal>
+  <header>
+    <span class="architecture-status" aria-hidden="true"></span>
+    <div>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
+  </header>
+  <div class="architecture-flow" aria-label={`${title} flow`}>
+    {nodes.map((node, index) => (
+      <>
+        <span class="architecture-node">{node}</span>
+        {index < nodes.length - 1 && <span class="flow-line" aria-hidden="true"><i></i></span>}
+      </>
+    ))}
+  </div>
+</article>

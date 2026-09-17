@@ -1,0 +1,590 @@
+---
+const worlds = [
+  { id: 'home', name: 'Launch', signal: 'Marlen Franto', color: [0.18, 0.76, 1.0], accent: [0.52, 0.35, 1.0], radius: 1.08, style: 0 },
+  { id: 'about', name: 'Profile', signal: 'Engineering core', color: [0.98, 0.43, 0.18], accent: [1.0, 0.78, 0.38], radius: 0.9, style: 1 },
+  { id: 'skills', name: 'Systems', signal: 'Technology constellation', color: [0.76, 0.22, 0.72], accent: [0.2, 0.82, 1.0], radius: 0.82, style: 2 },
+  { id: 'projects', name: 'Missions', signal: 'Selected products', color: [0.44, 0.35, 0.94], accent: [0.92, 0.66, 1.0], radius: 1.25, style: 3, ring: true },
+  { id: 'architecture', name: 'Architecture', signal: 'System design', color: [0.12, 0.72, 0.7], accent: [0.38, 0.95, 1.0], radius: 0.92, style: 4 },
+  { id: 'experience', name: 'Journey', signal: 'Career orbit', color: [0.12, 0.38, 0.94], accent: [0.44, 0.8, 1.0], radius: 1.0, style: 5 },
+  { id: 'contact', name: 'Signal', signal: 'Start a conversation', color: [0.1, 0.72, 1.0], accent: [0.52, 0.96, 1.0], radius: 0.82, style: 6 },
+];
+---
+
+<div class="galaxy-observatory" data-portfolio-galaxy data-worlds={JSON.stringify(worlds)} aria-hidden="true">
+  <canvas class="galaxy-canvas" data-galaxy-canvas></canvas>
+  <div class="galaxy-fallback"><span></span></div>
+  <div class="observatory-reticle"><i></i><i></i><i></i><i></i></div>
+  <div class="observatory-readout">
+    <p><span>Orbital focus</span><b data-orbit-number>01 / 07</b></p>
+    <strong data-orbit-name>Launch</strong>
+    <small data-orbit-signal>Marlen Franto</small>
+  </div>
+  <p class="observatory-instruction"><span></span> Scroll to navigate the system</p>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-portfolio-galaxy]');
+    const canvas = root?.querySelector('[data-galaxy-canvas]');
+    if (!(root instanceof HTMLElement) || !(canvas instanceof HTMLCanvasElement) || !root.dataset.worlds) return;
+    const worlds = JSON.parse(root.dataset.worlds);
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const compact = window.matchMedia('(max-width: 760px)').matches;
+    const gl = canvas.getContext('webgl2', {
+      alpha: true,
+      antialias: false,
+      depth: true,
+      powerPreference: 'high-performance',
+      premultipliedAlpha: true,
+    });
+
+    if (!gl) {
+      root.classList.add('is-fallback');
+      return;
+    }
+
+    root.classList.add('has-webgl');
+    const sectionNodes = worlds.map((world) => document.getElementById(world.id));
+    const readoutName = root.querySelector('[data-orbit-name]');
+    const readoutSignal = root.querySelector('[data-orbit-signal]');
+    const readoutNumber = root.querySelector('[data-orbit-number]');
+    const count = worlds.length;
+    const TAU = Math.PI * 2;
+
+    const planetVertex = `#version 300 es
+      precision highp float;
+      in vec3 aPosition;
+      in vec3 aNormal;
+      uniform mat4 uModel;
+      uniform mat4 uView;
+      uniform mat4 uProjection;
+      out vec3 vNormal;
+      out vec3 vWorld;
+      out vec3 vObject;
+      void main() {
+        vec4 world = uModel * vec4(aPosition, 1.0);
+        vWorld = world.xyz;
+        vObject = aPosition;
+        vNormal = normalize(mat3(uModel) * aNormal);
+        gl_Position = uProjection * uView * world;
+      }
+    `;
+
+    const planetFragment = `#version 300 es
+      precision highp float;
+      in vec3 vNormal;
+      in vec3 vWorld;
+      in vec3 vObject;
+      uniform vec3 uColor;
+      uniform vec3 uAccent;
+      uniform vec3 uCamera;
+      uniform float uSeed;
+      uniform float uStyle;
+      uniform float uFocus;
+      uniform float uTime;
+      uniform float uMode;
+      uniform float uOpacity;
+      out vec4 outColor;
+
+      float hash31(vec3 p) {
+        p = fract(p * 0.1031);
+        p += dot(p, p.yzx + 33.33);
+        return fract((p.x + p.y) * p.z);
+      }
+
+      float noise3(vec3 p) {
+        vec3 i = floor(p);
+        vec3 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(mix(hash31(i), hash31(i + vec3(1,0,0)), f.x), mix(hash31(i + vec3(0,1,0)), hash31(i + vec3(1,1,0)), f.x), f.y),
+          mix(mix(hash31(i + vec3(0,0,1)), hash31(i + vec3(1,0,1)), f.x), mix(hash31(i + vec3(0,1,1)), hash31(i + vec3(1,1,1)), f.x), f.y),
+          f.z
+        );
+      }
+
+      float fbm(vec3 p) {
+        float value = 0.0;
+        float amplitude = 0.55;
+        for (int i = 0; i < 4; i++) {
+          value += amplitude * noise3(p);
+          p = p * 2.03 + 7.17;
+          amplitude *= 0.48;
+        }
+        return value;
+      }
+
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDirection = normalize(uCamera - vWorld);
+        vec3 lightDirection = normalize(vec3(-0.55, 0.72, 0.9));
+        float diffuse = max(dot(normal, lightDirection), 0.0);
+        float rim = pow(1.0 - max(dot(normal, viewDirection), 0.0), 2.35);
+        float seed = uSeed * 13.71;
+        vec3 samplePoint = vObject * (3.0 + mod(uStyle, 3.0)) + seed;
+        float terrain = fbm(samplePoint + vec3(0.0, uTime * 0.012, 0.0));
+        float detail = fbm(samplePoint * 2.6 - seed);
+        float bands = 0.5 + 0.5 * sin(vObject.y * (18.0 + uStyle * 2.0) + terrain * 8.0 + seed);
+        float cells = smoothstep(0.52, 0.78, terrain + detail * 0.32);
+        float gasMix = mix(terrain, bands, step(2.5, uStyle) * 0.62);
+        vec3 deep = uColor * 0.19;
+        vec3 surface = mix(deep, uColor, smoothstep(0.18, 0.9, gasMix));
+        surface = mix(surface, uAccent, cells * (0.18 + 0.12 * sin(uStyle)));
+        surface *= 0.18 + diffuse * 0.88;
+        surface += uAccent * rim * (0.28 + uFocus * 0.56);
+        surface += vec3(0.82, 0.92, 1.0) * pow(diffuse, 15.0) * 0.34;
+        float nightGlow = smoothstep(0.37, 0.69, detail) * (1.0 - diffuse) * 0.06;
+        surface += uAccent * nightGlow;
+        outColor = vec4(surface, uOpacity);
+      }
+    `;
+
+    const lineVertex = `#version 300 es
+      precision highp float;
+      in vec3 aPosition;
+      uniform mat4 uModel;
+      uniform mat4 uView;
+      uniform mat4 uProjection;
+      uniform float uPointSize;
+      out float vDepth;
+      void main() {
+        vec4 world = uModel * vec4(aPosition, 1.0);
+        vec4 view = uView * world;
+        vDepth = clamp((-view.z - 2.0) / 18.0, 0.0, 1.0);
+        gl_Position = uProjection * view;
+        gl_PointSize = uPointSize * (1.0 + (1.0 - vDepth));
+      }
+    `;
+
+    const lineFragment = `#version 300 es
+      precision highp float;
+      uniform vec4 uLineColor;
+      uniform float uPoints;
+      in float vDepth;
+      out vec4 outColor;
+      void main() {
+        float alpha = uLineColor.a * mix(1.0, 0.35, vDepth);
+        if (uPoints > 0.5) {
+          vec2 center = gl_PointCoord - 0.5;
+          float distanceToCenter = length(center);
+          if (distanceToCenter > 0.5) discard;
+          alpha *= smoothstep(0.5, 0.06, distanceToCenter);
+        }
+        outColor = vec4(uLineColor.rgb, alpha);
+      }
+    `;
+
+    const compile = (type, source) => {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.warn('Galaxy shader could not compile.');
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    };
+
+    const makeProgram = (vertexSource, fragmentSource) => {
+      const vertex = compile(gl.VERTEX_SHADER, vertexSource);
+      const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
+      if (!vertex || !fragment) return null;
+      const program = gl.createProgram();
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.linkProgram(program);
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+      return gl.getProgramParameter(program, gl.LINK_STATUS) ? program : null;
+    };
+
+    const planetProgram = makeProgram(planetVertex, planetFragment);
+    const lineProgram = makeProgram(lineVertex, lineFragment);
+    if (!planetProgram || !lineProgram) {
+      root.classList.add('is-fallback');
+      return;
+    }
+
+    const makeSphere = (latitudeSegments, longitudeSegments) => {
+      const positions = [];
+      const normals = [];
+      const indices = [];
+      for (let lat = 0; lat <= latitudeSegments; lat += 1) {
+        const theta = (lat / latitudeSegments) * Math.PI;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+        for (let lon = 0; lon <= longitudeSegments; lon += 1) {
+          const phi = (lon / longitudeSegments) * TAU;
+          const x = Math.cos(phi) * sinTheta;
+          const y = cosTheta;
+          const z = Math.sin(phi) * sinTheta;
+          positions.push(x, y, z);
+          normals.push(x, y, z);
+        }
+      }
+      for (let lat = 0; lat < latitudeSegments; lat += 1) {
+        for (let lon = 0; lon < longitudeSegments; lon += 1) {
+          const first = lat * (longitudeSegments + 1) + lon;
+          const second = first + longitudeSegments + 1;
+          indices.push(first, second, first + 1, second, second + 1, first + 1);
+        }
+      }
+      return { positions, normals, indices };
+    };
+
+    const createMesh = ({ positions, normals = positions, indices = null }) => {
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      const positionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+      const planetPosition = gl.getAttribLocation(planetProgram, 'aPosition');
+      const linePosition = gl.getAttribLocation(lineProgram, 'aPosition');
+      if (planetPosition >= 0) {
+        gl.enableVertexAttribArray(planetPosition);
+        gl.vertexAttribPointer(planetPosition, 3, gl.FLOAT, false, 0, 0);
+      }
+      if (linePosition >= 0 && linePosition !== planetPosition) {
+        gl.enableVertexAttribArray(linePosition);
+        gl.vertexAttribPointer(linePosition, 3, gl.FLOAT, false, 0, 0);
+      }
+      const normalBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+      const normalLocation = gl.getAttribLocation(planetProgram, 'aNormal');
+      if (normalLocation >= 0) {
+        gl.enableVertexAttribArray(normalLocation);
+        gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+      }
+      let indexBuffer = null;
+      if (indices) {
+        indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+      }
+      gl.bindVertexArray(null);
+      return { vao, count: indices ? indices.length : positions.length / 3, indexed: Boolean(indices), positionBuffer, normalBuffer, indexBuffer };
+    };
+
+    const sphereData = makeSphere(compact ? 20 : 28, compact ? 28 : 40);
+    const sphere = createMesh(sphereData);
+
+    const circlePositions = [];
+    const circleSegments = compact ? 96 : 160;
+    for (let index = 0; index < circleSegments; index += 1) {
+      const angle = (index / circleSegments) * TAU;
+      circlePositions.push(Math.cos(angle), 0, Math.sin(angle));
+    }
+    const orbitMesh = createMesh({ positions: circlePositions });
+
+    const ringPositions = [];
+    const ringIndices = [];
+    const ringSegments = compact ? 72 : 112;
+    for (let index = 0; index <= ringSegments; index += 1) {
+      const angle = (index / ringSegments) * TAU;
+      const cosine = Math.cos(angle);
+      const sine = Math.sin(angle);
+      ringPositions.push(cosine * 1.42, 0, sine * 1.42, cosine * 2.05, 0, sine * 2.05);
+      if (index < ringSegments) {
+        const offset = index * 2;
+        ringIndices.push(offset, offset + 1, offset + 2, offset + 1, offset + 3, offset + 2);
+      }
+    }
+    const ringNormals = new Array(ringPositions.length).fill(0);
+    for (let index = 1; index < ringNormals.length; index += 3) ringNormals[index] = 1;
+    const ringMesh = createMesh({ positions: ringPositions, normals: ringNormals, indices: ringIndices });
+
+    const seeded = (seed) => {
+      const value = Math.sin(seed * 1283.17) * 43758.5453;
+      return value - Math.floor(value);
+    };
+    const starPositions = [];
+    const starCount = reduced ? 120 : compact ? 320 : 680;
+    for (let index = 0; index < starCount; index += 1) {
+      const radius = 18 + seeded(index + 2) * 32;
+      const angle = seeded(index + 13) * TAU;
+      const elevation = (seeded(index + 37) - 0.5) * 24;
+      starPositions.push(Math.cos(angle) * radius, elevation, Math.sin(angle) * radius - 12);
+    }
+    const starMesh = createMesh({ positions: starPositions });
+
+    const identity = () => new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+    const multiply = (a, b) => {
+      const out = new Float32Array(16);
+      for (let column = 0; column < 4; column += 1) {
+        for (let row = 0; row < 4; row += 1) {
+          out[column * 4 + row] =
+            a[row] * b[column * 4] +
+            a[4 + row] * b[column * 4 + 1] +
+            a[8 + row] * b[column * 4 + 2] +
+            a[12 + row] * b[column * 4 + 3];
+        }
+      }
+      return out;
+    };
+    const translation = (x, y, z) => {
+      const matrix = identity();
+      matrix[12] = x; matrix[13] = y; matrix[14] = z;
+      return matrix;
+    };
+    const scaling = (x, y = x, z = x) => {
+      const matrix = identity();
+      matrix[0] = x; matrix[5] = y; matrix[10] = z;
+      return matrix;
+    };
+    const rotationX = (angle) => {
+      const matrix = identity();
+      const cosine = Math.cos(angle); const sine = Math.sin(angle);
+      matrix[5] = cosine; matrix[6] = sine; matrix[9] = -sine; matrix[10] = cosine;
+      return matrix;
+    };
+    const rotationY = (angle) => {
+      const matrix = identity();
+      const cosine = Math.cos(angle); const sine = Math.sin(angle);
+      matrix[0] = cosine; matrix[2] = -sine; matrix[8] = sine; matrix[10] = cosine;
+      return matrix;
+    };
+    const rotationZ = (angle) => {
+      const matrix = identity();
+      const cosine = Math.cos(angle); const sine = Math.sin(angle);
+      matrix[0] = cosine; matrix[1] = sine; matrix[4] = -sine; matrix[5] = cosine;
+      return matrix;
+    };
+    const perspective = (fieldOfView, aspect, near, far) => {
+      const f = 1 / Math.tan(fieldOfView / 2);
+      const range = 1 / (near - far);
+      return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*range,-1, 0,0,2*far*near*range,0]);
+    };
+    const lookAt = (eye, center, up) => {
+      let zx = eye[0] - center[0]; let zy = eye[1] - center[1]; let zz = eye[2] - center[2];
+      let length = Math.hypot(zx, zy, zz); zx /= length; zy /= length; zz /= length;
+      let xx = up[1] * zz - up[2] * zy; let xy = up[2] * zx - up[0] * zz; let xz = up[0] * zy - up[1] * zx;
+      length = Math.hypot(xx, xy, xz); xx /= length; xy /= length; xz /= length;
+      const yx = zy * xz - zz * xy; const yy = zz * xx - zx * xz; const yz = zx * xy - zy * xx;
+      return new Float32Array([
+        xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0,
+        -(xx*eye[0]+xy*eye[1]+xz*eye[2]),
+        -(yx*eye[0]+yy*eye[1]+yz*eye[2]),
+        -(zx*eye[0]+zy*eye[1]+zz*eye[2]),1,
+      ]);
+    };
+    const compose = (...matrices) => matrices.reduce((result, matrix) => multiply(result, matrix), identity());
+
+    const planetLocations = {
+      model: gl.getUniformLocation(planetProgram, 'uModel'),
+      view: gl.getUniformLocation(planetProgram, 'uView'),
+      projection: gl.getUniformLocation(planetProgram, 'uProjection'),
+      color: gl.getUniformLocation(planetProgram, 'uColor'),
+      accent: gl.getUniformLocation(planetProgram, 'uAccent'),
+      camera: gl.getUniformLocation(planetProgram, 'uCamera'),
+      seed: gl.getUniformLocation(planetProgram, 'uSeed'),
+      style: gl.getUniformLocation(planetProgram, 'uStyle'),
+      focus: gl.getUniformLocation(planetProgram, 'uFocus'),
+      time: gl.getUniformLocation(planetProgram, 'uTime'),
+      mode: gl.getUniformLocation(planetProgram, 'uMode'),
+      opacity: gl.getUniformLocation(planetProgram, 'uOpacity'),
+    };
+    const lineLocations = {
+      model: gl.getUniformLocation(lineProgram, 'uModel'),
+      view: gl.getUniformLocation(lineProgram, 'uView'),
+      projection: gl.getUniformLocation(lineProgram, 'uProjection'),
+      color: gl.getUniformLocation(lineProgram, 'uLineColor'),
+      pointSize: gl.getUniformLocation(lineProgram, 'uPointSize'),
+      points: gl.getUniformLocation(lineProgram, 'uPoints'),
+    };
+
+    let width = 0;
+    let height = 0;
+    let projectionMatrix = identity();
+    let anchors = [];
+    let targetPosition = 0;
+    let renderedPosition = 0;
+    let activeIndex = -1;
+    let frame = 0;
+    let lastFrame = 0;
+    let startTime = performance.now();
+    let visible = !document.hidden;
+    const cameraPosition = compact ? [0, 0.15, 11.8] : [0, 0.2, 12.6];
+    const viewMatrix = lookAt(cameraPosition, [0, 0, 0], [0, 1, 0]);
+
+    const getJourneyPosition = () => {
+      if (anchors.length < 2) return 0;
+      const marker = window.scrollY + window.innerHeight * 0.46;
+      if (marker <= anchors[0]) return 0;
+      const last = anchors.length - 1;
+      if (marker >= anchors[last]) return last;
+      for (let index = 0; index < last; index += 1) {
+        if (marker >= anchors[index] && marker <= anchors[index + 1]) {
+          return index + (marker - anchors[index]) / Math.max(1, anchors[index + 1] - anchors[index]);
+        }
+      }
+      return 0;
+    };
+
+    const updateReadout = (index) => {
+      if (index === activeIndex) return;
+      activeIndex = index;
+      const world = worlds[index];
+      if (readoutName) readoutName.textContent = world.name;
+      if (readoutSignal) readoutSignal.textContent = world.signal;
+      if (readoutNumber) readoutNumber.textContent = `${String(index + 1).padStart(2, '0')} / ${String(count).padStart(2, '0')}`;
+      sectionNodes.forEach((section, sectionIndex) => section?.classList.toggle('is-orbit-current', sectionIndex === index));
+      window.dispatchEvent(new CustomEvent('portfolio-orbit-change', { detail: { id: world.id } }));
+    };
+
+    const setPlanetUniforms = (model, world, focus, time, opacity = 1) => {
+      gl.uniformMatrix4fv(planetLocations.model, false, model);
+      gl.uniformMatrix4fv(planetLocations.view, false, viewMatrix);
+      gl.uniformMatrix4fv(planetLocations.projection, false, projectionMatrix);
+      gl.uniform3fv(planetLocations.color, world.color);
+      gl.uniform3fv(planetLocations.accent, world.accent);
+      gl.uniform3fv(planetLocations.camera, cameraPosition);
+      gl.uniform1f(planetLocations.seed, world.style + 0.71);
+      gl.uniform1f(planetLocations.style, world.style);
+      gl.uniform1f(planetLocations.focus, focus);
+      gl.uniform1f(planetLocations.time, time);
+      gl.uniform1f(planetLocations.mode, 0);
+      gl.uniform1f(planetLocations.opacity, opacity);
+    };
+
+    const drawLines = (mesh, model, color, points = false) => {
+      gl.useProgram(lineProgram);
+      gl.bindVertexArray(mesh.vao);
+      gl.uniformMatrix4fv(lineLocations.model, false, model);
+      gl.uniformMatrix4fv(lineLocations.view, false, viewMatrix);
+      gl.uniformMatrix4fv(lineLocations.projection, false, projectionMatrix);
+      gl.uniform4fv(lineLocations.color, color);
+      gl.uniform1f(lineLocations.pointSize, compact ? 1.15 : 1.45);
+      gl.uniform1f(lineLocations.points, points ? 1 : 0);
+      gl.drawArrays(points ? gl.POINTS : gl.LINE_LOOP, 0, mesh.count);
+    };
+
+    const render = (now, force = false) => {
+      frame = 0;
+      if (!visible) return;
+      const frameInterval = reduced ? 1000 : compact ? 40 : 28;
+      if (!force && now - lastFrame < frameInterval) {
+        frame = requestAnimationFrame(render);
+        return;
+      }
+      lastFrame = now;
+      renderedPosition += (targetPosition - renderedPosition) * (reduced ? 1 : 0.145);
+      const time = reduced ? 0 : (now - startTime) * 0.001;
+      const orbitRadius = compact ? 6.1 : 6.65;
+      const offsetX = compact ? 0 : 2.55;
+      const step = TAU / count;
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      const starRotation = compose(rotationY(-renderedPosition * step * 0.17 + time * 0.006), rotationX(-0.06));
+      gl.disable(gl.DEPTH_TEST);
+      drawLines(starMesh, starRotation, [0.56, 0.76, 1.0, compact ? 0.5 : 0.66], true);
+      gl.enable(gl.DEPTH_TEST);
+
+      const orbitModel = compose(translation(offsetX, 0, 0), rotationZ(compact ? 0.22 : 0.12), scaling(orbitRadius));
+      drawLines(orbitMesh, orbitModel, [0.3, 0.64, 1.0, 0.13]);
+      drawLines(orbitMesh, compose(translation(offsetX, 0, 0), rotationZ(-0.28), rotationX(0.48), scaling(orbitRadius * 0.72)), [0.61, 0.43, 1.0, 0.07]);
+
+      gl.useProgram(planetProgram);
+      gl.bindVertexArray(sphere.vao);
+      const coreModel = compose(translation(offsetX, 0, 0), scaling(0.28 + Math.sin(time * 0.8) * 0.015));
+      setPlanetUniforms(coreModel, { color: [0.65,0.82,1], accent: [0.54,0.3,1], style: 3 }, 1, time, 0.54);
+      gl.drawElements(gl.TRIANGLES, sphere.count, gl.UNSIGNED_SHORT, 0);
+
+      worlds.forEach((world, index) => {
+        const angle = Math.PI / 2 + (index - renderedPosition) * step;
+        const x = offsetX + Math.cos(angle) * orbitRadius;
+        const z = Math.sin(angle) * orbitRadius;
+        const y = Math.sin(index * 2.31) * (compact ? 0.28 : 0.62);
+        const rawDistance = Math.abs(index - renderedPosition);
+        const wrappedDistance = Math.min(rawDistance, count - rawDistance);
+        const focus = Math.max(0, 1 - wrappedDistance);
+        const proximity = Math.max(0, 1 - wrappedDistance / 1.08);
+        const opacity = Math.min(0.94, 0.035 + focus * 0.82 + proximity * 0.08);
+        const radius = world.radius * (0.34 + focus * (compact ? 0.62 : 0.74));
+        const model = compose(
+          translation(x, y, z),
+          rotationZ(0.08 + world.style * 0.055),
+          rotationY(time * (0.08 + world.style * 0.008) + world.style),
+          scaling(radius)
+        );
+        gl.useProgram(planetProgram);
+        gl.bindVertexArray(sphere.vao);
+        setPlanetUniforms(model, world, focus, time, opacity);
+        gl.drawElements(gl.TRIANGLES, sphere.count, gl.UNSIGNED_SHORT, 0);
+
+        if (world.ring) {
+          const ringModel = compose(translation(x, y, z), rotationZ(-0.2), rotationX(0.62), rotationY(time * 0.025), scaling(radius));
+          gl.useProgram(lineProgram);
+          gl.bindVertexArray(ringMesh.vao);
+          gl.uniformMatrix4fv(lineLocations.model, false, ringModel);
+          gl.uniformMatrix4fv(lineLocations.view, false, viewMatrix);
+          gl.uniformMatrix4fv(lineLocations.projection, false, projectionMatrix);
+          gl.uniform4fv(lineLocations.color, [0.72, 0.56, 1.0, 0.04 + focus * 0.52]);
+          gl.uniform1f(lineLocations.pointSize, 1);
+          gl.uniform1f(lineLocations.points, 0);
+          gl.drawElements(gl.TRIANGLES, ringMesh.count, gl.UNSIGNED_SHORT, 0);
+        }
+      });
+
+      gl.bindVertexArray(null);
+      updateReadout(Math.max(0, Math.min(count - 1, Math.round(renderedPosition))));
+      const settling = Math.abs(targetPosition - renderedPosition) > 0.001;
+      if (settling) frame = requestAnimationFrame(render);
+    };
+
+    const resize = () => {
+      const bounds = canvas.getBoundingClientRect();
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, compact ? 1 : 1.35);
+      width = Math.max(1, Math.round(bounds.width * pixelRatio));
+      height = Math.max(1, Math.round(bounds.height * pixelRatio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      gl.viewport(0, 0, width, height);
+      projectionMatrix = perspective((compact ? 50 : 43) * Math.PI / 180, width / height, 0.1, 100);
+      anchors = sectionNodes.map((section) => {
+        if (!(section instanceof HTMLElement)) return 0;
+        const bounds = section.getBoundingClientRect();
+        return bounds.top + window.scrollY + Math.min(bounds.height * 0.12, 96);
+      });
+      targetPosition = getJourneyPosition();
+      render(performance.now(), true);
+    };
+
+    const requestRender = () => {
+      targetPosition = getJourneyPosition();
+      if (!frame) frame = requestAnimationFrame(render);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      visible = !document.hidden;
+      if (visible && !frame) {
+        startTime = performance.now();
+        frame = requestAnimationFrame(render);
+      }
+    });
+    window.addEventListener('scroll', requestRender, { passive: true });
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('load', resize, { once: true });
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      root.classList.add('is-fallback');
+      if (frame) cancelAnimationFrame(frame);
+    });
+
+    resize();
+    renderedPosition = reduced ? targetPosition : Math.max(0, targetPosition - 0.12);
+    updateReadout(Math.max(0, Math.min(count - 1, Math.round(targetPosition))));
+    frame = requestAnimationFrame(render);
+  })();
+</script>
