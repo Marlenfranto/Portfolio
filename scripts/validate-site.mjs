@@ -55,6 +55,8 @@ const draftInsightSlugs = [
   'mobile-release-risks',
 ];
 
+const vercelRuntimePrefixes = ['/_vercel/'];
+
 const failures = [];
 const warnings = [];
 
@@ -132,6 +134,8 @@ const pathForUrl = (rawUrl) => {
     return undefined;
   }
 };
+
+const isRuntimeServedPath = (pathname) => vercelRuntimePrefixes.some((prefix) => pathname?.startsWith(prefix));
 
 const fileForPathname = (pathname) => {
   if (!pathname || pathname === '/') return join(dist, 'index.html');
@@ -225,6 +229,7 @@ for (const file of htmlFiles) {
     if (!parsed) continue;
     if (parsed.hash && !routeHasAnchor(parsed.pathname, parsed.hash)) failures.push(`${file} links to missing anchor ${ref}`);
     if (!parsed.pathname) continue;
+    if (isRuntimeServedPath(parsed.pathname)) continue;
     const target = fileForPathname(parsed.pathname);
     if (!existsSync(target)) failures.push(`${file} links to missing local asset/page ${ref}`);
   }
@@ -311,7 +316,7 @@ if (existsSync(homePath)) {
   const homeHtml = readFileSync(homePath, 'utf8');
   const initialScriptPaths = htmlTags(homeHtml, 'script')
     .map((attrs) => pathForUrl(attrs.src)?.pathname)
-    .filter(Boolean);
+    .filter((pathname) => pathname && !isRuntimeServedPath(pathname));
   const initialJsGzip = initialScriptPaths.reduce((total, pathname) => {
     const path = fileForPathname(pathname);
     return total + (existsSync(path) ? gzipSync(readFileSync(path)).length : 0);
