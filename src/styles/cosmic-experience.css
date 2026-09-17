@@ -395,8 +395,9 @@ main {
   width: 100%;
   height: 100%;
   opacity: 0;
-  filter: saturate(1.08) contrast(1.04);
   transition: opacity 700ms ease;
+  transform: translateZ(0);
+  will-change: opacity;
 }
 
 .galaxy-observatory.has-webgl .galaxy-canvas {
@@ -1694,6 +1695,7 @@ main {
 
   .galaxy-observatory { opacity: 0.56; }
   .observatory-readout { display: none; }
+  .observatory-reticle { opacity: 0.36; }
 }
 
 @media (max-width: 420px) {

@@ -4,7 +4,7 @@ const worlds = [
   { id: 'about', name: 'Profile', signal: 'Engineering core', color: [0.98, 0.43, 0.18], accent: [1.0, 0.78, 0.38], radius: 0.9, style: 1 },
   { id: 'skills', name: 'Systems', signal: 'Technology constellation', color: [0.76, 0.22, 0.72], accent: [0.2, 0.82, 1.0], radius: 0.82, style: 2 },
   { id: 'projects', name: 'Missions', signal: 'Selected products', color: [0.44, 0.35, 0.94], accent: [0.92, 0.66, 1.0], radius: 1.25, style: 3, ring: true },
-  { id: 'architecture', name: 'Architecture', signal: 'System design', color: [0.12, 0.72, 0.7], accent: [0.38, 0.95, 1.0], radius: 0.92, style: 4 },
+  { id: 'engineering', name: 'Lab', signal: 'Engineering problems', color: [0.12, 0.72, 0.7], accent: [0.38, 0.95, 1.0], radius: 0.92, style: 4 },
   { id: 'experience', name: 'Journey', signal: 'Career orbit', color: [0.12, 0.38, 0.94], accent: [0.44, 0.8, 1.0], radius: 1.0, style: 5 },
   { id: 'contact', name: 'Signal', signal: 'Start a conversation', color: [0.1, 0.72, 1.0], accent: [0.52, 0.96, 1.0], radius: 0.82, style: 6 },
 ];
@@ -31,11 +31,21 @@ const worlds = [
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const compact = window.matchMedia('(max-width: 760px)').matches;
+    const saveData = 'connection' in navigator && Boolean(navigator.connection?.saveData);
+    const lowPower = saveData || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const idleFrameInterval = compact || lowPower ? 96 : 58;
+    const activeFrameInterval = compact || lowPower ? 48 : 30;
+
+    if (reduced) {
+      root.classList.add('is-fallback');
+      return;
+    }
+
     const gl = canvas.getContext('webgl2', {
       alpha: true,
       antialias: false,
       depth: true,
-      powerPreference: 'high-performance',
+      powerPreference: lowPower ? 'low-power' : 'high-performance',
       premultipliedAlpha: true,
     });
 
@@ -107,7 +117,7 @@ const worlds = [
       float fbm(vec3 p) {
         float value = 0.0;
         float amplitude = 0.55;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
           value += amplitude * noise3(p);
           p = p * 2.03 + 7.17;
           amplitude *= 0.48;
@@ -268,11 +278,11 @@ const worlds = [
       return { vao, count: indices ? indices.length : positions.length / 3, indexed: Boolean(indices), positionBuffer, normalBuffer, indexBuffer };
     };
 
-    const sphereData = makeSphere(compact ? 20 : 28, compact ? 28 : 40);
+    const sphereData = makeSphere(compact || lowPower ? 12 : 18, compact || lowPower ? 18 : 26);
     const sphere = createMesh(sphereData);
 
     const circlePositions = [];
-    const circleSegments = compact ? 96 : 160;
+    const circleSegments = compact || lowPower ? 56 : 96;
     for (let index = 0; index < circleSegments; index += 1) {
       const angle = (index / circleSegments) * TAU;
       circlePositions.push(Math.cos(angle), 0, Math.sin(angle));
@@ -281,7 +291,7 @@ const worlds = [
 
     const ringPositions = [];
     const ringIndices = [];
-    const ringSegments = compact ? 72 : 112;
+    const ringSegments = compact || lowPower ? 40 : 64;
     for (let index = 0; index <= ringSegments; index += 1) {
       const angle = (index / ringSegments) * TAU;
       const cosine = Math.cos(angle);
@@ -301,7 +311,7 @@ const worlds = [
       return value - Math.floor(value);
     };
     const starPositions = [];
-    const starCount = reduced ? 120 : compact ? 320 : 680;
+    const starCount = compact || lowPower ? 140 : 320;
     for (let index = 0; index < starCount; index += 1) {
       const radius = 18 + seeded(index + 2) * 32;
       const angle = seeded(index + 13) * TAU;
@@ -405,6 +415,7 @@ const worlds = [
     let frame = 0;
     let lastFrame = 0;
     let startTime = performance.now();
+    let activeUntil = startTime + 900;
     let visible = !document.hidden;
     const cameraPosition = compact ? [0, 0.15, 11.8] : [0, 0.2, 12.6];
     const viewMatrix = lookAt(cameraPosition, [0, 0, 0], [0, 1, 0]);
@@ -464,14 +475,15 @@ const worlds = [
     const render = (now, force = false) => {
       frame = 0;
       if (!visible) return;
-      const frameInterval = reduced ? 1000 : compact ? 40 : 28;
+      const isActive = now < activeUntil || Math.abs(targetPosition - renderedPosition) > 0.002;
+      const frameInterval = isActive ? activeFrameInterval : idleFrameInterval;
       if (!force && now - lastFrame < frameInterval) {
         frame = requestAnimationFrame(render);
         return;
       }
       lastFrame = now;
-      renderedPosition += (targetPosition - renderedPosition) * (reduced ? 1 : 0.145);
-      const time = reduced ? 0 : (now - startTime) * 0.001;
+      renderedPosition += (targetPosition - renderedPosition) * 0.18;
+      const time = (now - startTime) * 0.001;
       const orbitRadius = compact ? 6.1 : 6.65;
       const offsetX = compact ? 0 : 2.55;
       const step = TAU / count;
@@ -509,6 +521,7 @@ const worlds = [
         const focus = Math.max(0, 1 - wrappedDistance);
         const proximity = Math.max(0, 1 - wrappedDistance / 1.08);
         const opacity = Math.min(0.94, 0.035 + focus * 0.82 + proximity * 0.08);
+        if (opacity < 0.052) return;
         const radius = world.radius * (0.34 + focus * (compact ? 0.62 : 0.74));
         const model = compose(
           translation(x, y, z),
@@ -538,7 +551,7 @@ const worlds = [
       gl.bindVertexArray(null);
       updateReadout(Math.max(0, Math.min(count - 1, Math.round(renderedPosition))));
       const settling = Math.abs(targetPosition - renderedPosition) > 0.001;
-      if (settling) frame = requestAnimationFrame(render);
+      if (settling || visible) frame = requestAnimationFrame(render);
     };
 
     const resize = () => {
@@ -563,6 +576,7 @@ const worlds = [
 
     const requestRender = () => {
       targetPosition = getJourneyPosition();
+      activeUntil = performance.now() + 900;
       if (!frame) frame = requestAnimationFrame(render);
     };
 
@@ -570,6 +584,7 @@ const worlds = [
       visible = !document.hidden;
       if (visible && !frame) {
         startTime = performance.now();
+        activeUntil = startTime + 900;
         frame = requestAnimationFrame(render);
       }
     });

@@ -40,7 +40,7 @@ const canonicalPath = path.endsWith('/') ? path : `${path}/`;
 const canonicalUrl = new URL(canonicalPath, siteConfig.url).toString();
 const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.url).toString();
 const isPreviewDeployment = import.meta.env.VERCEL_ENV === 'preview';
-const shouldLoadVercelInsights = import.meta.env.VERCEL === '1' && !isPreviewDeployment;
+const shouldLoadVercelInsights = import.meta.env.PUBLIC_ENABLE_VERCEL_ANALYTICS === 'true' && import.meta.env.VERCEL === '1' && !isPreviewDeployment;
 const robots = noindex || isPreviewDeployment ? 'noindex,nofollow' : 'index,follow';
 const allStructuredData = [
   ...structuredData,
